@@ -1,40 +1,106 @@
 import Joi from 'joi';
 
+const hairSchema = Joi.object({
+  color: Joi.string().allow('', null),
+  type: Joi.string().allow('', null)
+});
+
+const coordinatesSchema = Joi.object({
+  lat: Joi.number().allow(null),
+  lng: Joi.number().allow(null)
+});
+
+const addressSchema = Joi.object({
+  address: Joi.string().allow('', null),
+  city: Joi.string().allow('', null),
+  state: Joi.string().allow('', null),
+  stateCode: Joi.string().allow('', null),
+  postalCode: Joi.string().allow('', null),
+  coordinates: coordinatesSchema.allow(null),
+  country: Joi.string().allow('', null)
+});
+
+const bankSchema = Joi.object({
+  cardExpire: Joi.string().allow('', null),
+  cardNumber: Joi.string().allow('', null),
+  cardType: Joi.string().allow('', null),
+  currency: Joi.string().allow('', null),
+  iban: Joi.string().allow('', null)
+});
+
+const companySchema = Joi.object({
+  department: Joi.string().allow('', null),
+  name: Joi.string().allow('', null),
+  title: Joi.string().allow('', null),
+  address: addressSchema.allow(null)
+});
+
+const cryptoSchema = Joi.object({
+  coin: Joi.string().allow('', null),
+  wallet: Joi.string().allow('', null),
+  network: Joi.string().allow('', null)
+});
+
 export const createUserSchema = Joi.object({
-  username: Joi.string().min(3).max(50).trim().required().messages({
-    'string.empty': 'Username cannot be empty',
-    'string.min': 'Username must be at least 3 characters long',
-    'string.max': 'Username cannot exceed 50 characters',
-    'any.required': 'Username is required'
-  }),
-  company: Joi.string().min(2).max(100).trim().required().messages({
-    'string.empty': 'Company cannot be empty',
-    'string.min': 'Company must be at least 2 characters long',
-    'any.required': 'Company is required'
-  }),
-  role: Joi.string().min(2).max(100).trim().required().messages({
-    'string.empty': 'Role cannot be empty',
-    'string.min': 'Role must be at least 2 characters long',
-    'any.required': 'Role is required'
-  }),
-  email: Joi.string().email().trim().required().messages({
-    'string.empty': 'Email cannot be empty',
-    'string.email': 'Please enter a valid email address',
-    'any.required': 'Email is required'
-  }),
-  salary: Joi.number().positive().required().messages({
-    'number.base': 'Salary must be a number',
-    'number.positive': 'Salary must be a positive number',
-    'any.required': 'Salary is required'
-  })
+  firstName: Joi.string().min(1).max(100).required(),
+  lastName: Joi.string().min(1).max(100).required(),
+  maidenName: Joi.string().allow('', null),
+  age: Joi.number().integer().min(0).max(150).required(),
+  gender: Joi.string().required(),
+  email: Joi.string().email().required(),
+  phone: Joi.string().required(),
+  username: Joi.string().min(3).max(50).required(),
+  password: Joi.string().min(4).max(50).required(),
+  birthDate: Joi.string().required(),
+  image: Joi.string().allow('', null),
+  bloodGroup: Joi.string().allow('', null),
+  height: Joi.number().positive().allow(null),
+  weight: Joi.number().positive().allow(null),
+  eyeColor: Joi.string().allow('', null),
+  hair: hairSchema.allow(null),
+  address: addressSchema.allow(null),
+  ip: Joi.string().allow('', null),
+  macAddress: Joi.string().allow('', null),
+  university: Joi.string().allow('', null),
+  bank: bankSchema.allow(null),
+  company: companySchema.allow(null),
+  ein: Joi.string().allow('', null),
+  ssn: Joi.string().allow('', null),
+  userAgent: Joi.string().allow('', null),
+  crypto: cryptoSchema.allow(null),
+  role: Joi.string().required(),
+  salary: Joi.number().required()
 });
 
 export const updateUserSchema = Joi.object({
-  username: Joi.string().min(3).max(50).trim(),
-  company: Joi.string().min(2).max(100).trim(),
-  role: Joi.string().min(2).max(100).trim(),
-  email: Joi.string().email().trim(),
-  salary: Joi.number().positive()
+  firstName: Joi.string().min(1).max(100),
+  lastName: Joi.string().min(1).max(100),
+  maidenName: Joi.string().allow('', null),
+  age: Joi.number().integer().min(0).max(150),
+  gender: Joi.string(),
+  email: Joi.string().email(),
+  phone: Joi.string(),
+  username: Joi.string().min(3).max(50),
+  password: Joi.string().min(4).max(50),
+  birthDate: Joi.string(),
+  image: Joi.string().allow('', null),
+  bloodGroup: Joi.string().allow('', null),
+  height: Joi.number().positive().allow(null),
+  weight: Joi.number().positive().allow(null),
+  eyeColor: Joi.string().allow('', null),
+  hair: hairSchema.allow(null),
+  address: addressSchema.allow(null),
+  ip: Joi.string().allow('', null),
+  macAddress: Joi.string().allow('', null),
+  university: Joi.string().allow('', null),
+  bank: bankSchema.allow(null),
+  company: companySchema.allow(null),
+  ein: Joi.string().allow('', null),
+  ssn: Joi.string().allow('', null),
+  userAgent: Joi.string().allow('', null),
+  crypto: cryptoSchema.allow(null),
+  role: Joi.string(),
+  salary: Joi.number()
 })
   .min(1)
   .messages({

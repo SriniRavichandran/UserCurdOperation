@@ -4,9 +4,6 @@ import { sendError } from '../utils/responseHelper';
 import { ValidationError as SequelizeValidationError, UniqueConstraintError } from 'sequelize';
 
 export const errorHandler = (err: any, req: Request, res: Response, _next: NextFunction): void => {
-  console.error('--- ERROR LOG ---');
-  console.error(err);
-
   // Handle custom AppErrors (Operational errors)
   if (err instanceof AppError) {
     sendError(res, err.message, null, err.statusCode);

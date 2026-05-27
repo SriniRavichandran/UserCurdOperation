@@ -10,15 +10,9 @@ const startServer = async (): Promise<void> => {
   // Test connection to the MySQL database
   await connectDB();
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`=========================================`);
-    console.log(`  Backend is running in ${process.env.NODE_ENV || 'development'} mode`);
-    console.log(`  Local URL: http://localhost:${PORT}`);
-    console.log(`=========================================`);
-  });
+  app.listen(PORT, '0.0.0.0', () => {});
 };
 
-startServer().catch((error) => {
-  console.error('Fatal error during server startup:', error);
+startServer().catch(() => {
   process.exit(1);
 });

@@ -1,0 +1,4 @@
+#!/bin/sh
+echo "=== Running Frontend Pre-commit Hooks ==="
+cd frontend && npm run format && npm run lint && npm run test || exit 1
+echo "=== Frontend Checks Passed! ==="

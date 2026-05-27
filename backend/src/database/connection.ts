@@ -13,7 +13,7 @@ export const sequelize = new Sequelize(dbName, dbUser, dbPassword, {
   host: dbHost,
   port: dbPort,
   dialect: 'mysql',
-  logging: process.env.NODE_ENV === 'production' ? false : console.log,
+  logging: false,
   define: {
     timestamps: true
   }
@@ -22,9 +22,7 @@ export const sequelize = new Sequelize(dbName, dbUser, dbPassword, {
 export const connectDB = async (): Promise<void> => {
   try {
     await sequelize.authenticate();
-    console.log('MySQL Database connection has been established successfully.');
-  } catch (error) {
-    console.error('Unable to connect to the database:', error);
+  } catch {
     process.exit(1);
   }
 };

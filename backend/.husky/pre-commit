@@ -1,0 +1,4 @@
+#!/bin/sh
+echo "=== Running Backend Pre-commit Hooks ==="
+cd backend && npm run format && npm run lint && npm run test || exit 1
+echo "=== Backend Checks Passed! ==="

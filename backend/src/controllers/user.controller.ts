@@ -3,21 +3,57 @@ import UserService from '../services/user.service';
 import { sendSuccess } from '../utils/responseHelper';
 import { BadRequestError } from '../utils/customErrors';
 
+function generateRandomMac(): string {
+  const hexDigits = '0123456789abcdef';
+  let mac = '';
+  for (let i = 0; i < 6; i++) {
+    mac += hexDigits.charAt(Math.floor(Math.random() * 16));
+    mac += hexDigits.charAt(Math.floor(Math.random() * 16));
+    if (i < 5) mac += ':';
+  }
+  return mac;
+}
+
 export class UserController {
   /**
-   * Get all users, optionally filtered.
+   * Get all users with pagination and multi-select filters.
    */
   public async getUsers(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { search, company, role } = req.query;
+      const { search, companies, roles, page, limit } = req.query;
 
-      const users = await UserService.getAllUsers({
+      // Support comma-separated or array values for companies and roles
+      const companiesArr = companies
+        ? Array.isArray(companies)
+          ? (companies as string[])
+          : String(companies).split(',').filter(Boolean)
+        : undefined;
+
+      const rolesArr = roles
+        ? Array.isArray(roles)
+          ? (roles as string[])
+          : String(roles).split(',').filter(Boolean)
+        : undefined;
+
+      const result = await UserService.getAllUsersPaginated({
         search: search ? String(search) : undefined,
-        company: company ? String(company) : undefined,
-        role: role ? String(role) : undefined
+        companies: companiesArr && companiesArr.length > 0 ? companiesArr : undefined,
+        roles: rolesArr && rolesArr.length > 0 ? rolesArr : undefined,
+        page: page ? parseInt(String(page), 10) : 1,
+        limit: limit ? parseInt(String(limit), 10) : 10
       });
 
-      sendSuccess(res, 'Users retrieved successfully', users);
+      res.json({
+        success: true,
+        message: 'Users retrieved successfully',
+        data: result.users,
+        pagination: {
+          total: result.total,
+          page: result.page,
+          limit: result.limit,
+          totalPages: result.totalPages
+        }
+      });
     } catch (error) {
       next(error);
     }
@@ -45,7 +81,25 @@ export class UserController {
    */
   public async createUser(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const user = await UserService.createUser(req.body);
+      // Automatic IP retrieval
+      let clientIp = req.ip || req.headers['x-forwarded-for'] || '12.13.116.142';
+      if (clientIp === '::1' || clientIp === '::ffff:127.0.0.1' || clientIp === '127.0.0.1') {
+        clientIp = '12.13.116.142'; // realistic mock IP for local testing
+      }
+      if (Array.isArray(clientIp)) {
+        clientIp = clientIp[0];
+      }
+
+      // Automatic MAC generation
+      const macAddress = generateRandomMac();
+
+      const userData = {
+        ...req.body,
+        ip: clientIp,
+        macAddress: macAddress
+      };
+
+      const user = await UserService.createUser(userData);
       sendSuccess(res, 'User created successfully', user, 201);
     } catch (error) {
       next(error);

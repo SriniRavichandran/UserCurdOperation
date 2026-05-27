@@ -20,7 +20,6 @@ export const useUserStats = (apiMode: ApiMode, usersDependency?: any) => {
       setStats(data);
     } catch (err: any) {
       setError(err);
-      console.error('Failed to fetch stats:', err);
     } finally {
       setIsLoading(false);
     }

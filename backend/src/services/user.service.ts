@@ -4,7 +4,20 @@ import { NotFoundError, ConflictError } from '../utils/customErrors';
 
 export class UserService {
   /**
-   * Get all users, filtered by search query, company or role.
+   * Get paginated users with multi-select company/role filters.
+   */
+  public async getAllUsersPaginated(filters?: {
+    search?: string;
+    companies?: string[];
+    roles?: string[];
+    page?: number;
+    limit?: number;
+  }) {
+    return await UserRepository.findAllPaginated(filters);
+  }
+
+  /**
+   * Get all users (non-paginated, for stats).
    */
   public async getAllUsers(filters?: { search?: string; company?: string; role?: string }) {
     return await UserRepository.findAll(filters);
@@ -75,7 +88,8 @@ export class UserService {
 
     const companyCounts: { [key: string]: number } = {};
     users.forEach((user) => {
-      companyCounts[user.company] = (companyCounts[user.company] || 0) + 1;
+      const companyName = user.company?.name || 'Freelance';
+      companyCounts[companyName] = (companyCounts[companyName] || 0) + 1;
     });
 
     let topCompany = 'N/A';

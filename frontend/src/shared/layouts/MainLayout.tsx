@@ -35,7 +35,6 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, apiMode, onApi
 
   return (
     <Box minH="100vh" bg={bodyBg} pb={12}>
-      {/* Header Banner */}
       <Box bg={headerBg} color="white" py={8} px={4} mb={8} boxShadow="lg" position="relative">
         <Container maxW="container.xl">
           <Flex
@@ -56,7 +55,6 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, apiMode, onApi
               </Text>
             </Box>
 
-            {/* Config Panel */}
             <HStack
               spacing={4}
               align="center"
@@ -102,7 +100,6 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, apiMode, onApi
         </Container>
       </Box>
 
-      {/* Main Content Container */}
       <Container maxW="container.xl">{children}</Container>
     </Box>
   );

@@ -11,14 +11,15 @@ import {
   Tag,
   TagLabel,
   Text,
-  Badge,
   Flex,
   Heading,
   HStack,
   useColorModeValue,
   Center,
   VStack,
-  Icon
+  Icon,
+  Avatar,
+  Box
 } from '@chakra-ui/react';
 import { FiEdit2, FiTrash2, FiInbox, FiChevronUp, FiChevronDown } from 'react-icons/fi';
 import { User } from '../types/user.types';
@@ -30,28 +31,20 @@ interface CustomTableProps {
   isLoading: boolean;
 }
 
-type SortField = 'username' | 'company' | 'role' | 'email' | 'salary';
+type SortField = 'name' | 'company' | 'role' | 'country';
 type SortOrder = 'asc' | 'desc';
 
 export const CustomTable: React.FC<CustomTableProps> = ({ users, onEdit, onDelete, isLoading }) => {
-  const [sortField, setSortField] = useState<SortField>('username');
+  const [sortField, setSortField] = useState<SortField>('name');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
 
   const bg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.100', 'gray.700');
-  const headerBg = useColorModeValue('gray.50/50', 'gray.900/30');
-  const hoverBg = useColorModeValue('gray.50/50', 'gray.800/40');
+  const headerBg = useColorModeValue('gray.50', 'gray.900');
+  const hoverBg = useColorModeValue('blue.50', 'gray.700');
   const textColor = useColorModeValue('gray.800', 'gray.100');
+  const subTextColor = useColorModeValue('gray.500', 'gray.400');
 
-  // Helper to format currency
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(value);
-  };
-
-  // Helper for sorting
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -61,22 +54,31 @@ export const CustomTable: React.FC<CustomTableProps> = ({ users, onEdit, onDelet
     }
   };
 
-  const getSortIcon = (field: SortField) => {
-    if (sortField !== field) return null;
-    return sortOrder === 'asc' ? <Icon as={FiChevronUp} ml={1} /> : <Icon as={FiChevronDown} ml={1} />;
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (sortField !== field) return <Icon as={FiChevronUp} ml={1} opacity={0.3} />;
+    return sortOrder === 'asc' ? (
+      <Icon as={FiChevronUp} ml={1} color="blue.400" />
+    ) : (
+      <Icon as={FiChevronDown} ml={1} color="blue.400" />
+    );
   };
 
-  // Sort logic
   const sortedUsers = [...users].sort((a, b) => {
-    let aVal: any = a[sortField];
-    let bVal: any = b[sortField];
+    let aVal = '';
+    let bVal = '';
 
-    if (sortField === 'salary') {
-      aVal = Number(aVal);
-      bVal = Number(bVal);
-    } else {
-      aVal = String(aVal).toLowerCase();
-      bVal = String(bVal).toLowerCase();
+    if (sortField === 'name') {
+      aVal = `${a.firstName || ''} ${a.lastName || ''}`.toLowerCase();
+      bVal = `${b.firstName || ''} ${b.lastName || ''}`.toLowerCase();
+    } else if (sortField === 'company') {
+      aVal = (a.company?.name || 'Freelance').toLowerCase();
+      bVal = (b.company?.name || 'Freelance').toLowerCase();
+    } else if (sortField === 'role') {
+      aVal = (a.company?.title || a.role || '').toLowerCase();
+      bVal = (b.company?.title || b.role || '').toLowerCase();
+    } else if (sortField === 'country') {
+      aVal = (a.address?.country || '').toLowerCase();
+      bVal = (b.address?.country || '').toLowerCase();
     }
 
     if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
@@ -84,14 +86,17 @@ export const CustomTable: React.FC<CustomTableProps> = ({ users, onEdit, onDelet
     return 0;
   });
 
-  // Helper for role coloring
-  const getRoleColorScheme = (role: string) => {
-    const r = role.toLowerCase();
-    if (r.includes('engineer') || r.includes('developer')) return 'blue';
-    if (r.includes('manager') || r.includes('lead')) return 'purple';
-    if (r.includes('designer') || r.includes('ux') || r.includes('ui')) return 'pink';
-    if (r.includes('analyst') || r.includes('data') || r.includes('science')) return 'teal';
-    if (r.includes('admin') || r.includes('ops') || r.includes('devops')) return 'orange';
+  const getRoleBadge = (title: string) => {
+    const t = (title || '').toLowerCase();
+    if (t.includes('chief') || t.includes('ceo') || t.includes('cfo') || t.includes('cto') || t.includes('director'))
+      return 'purple';
+    if (t.includes('manager') || t.includes('lead')) return 'blue';
+    if (t.includes('engineer') || t.includes('developer') || t.includes('architect')) return 'cyan';
+    if (t.includes('analyst') || t.includes('data') || t.includes('scientist')) return 'teal';
+    if (t.includes('designer') || t.includes('ux') || t.includes('ui')) return 'pink';
+    if (t.includes('support') || t.includes('specialist') || t.includes('consultant')) return 'orange';
+    if (t.includes('legal') || t.includes('counsel') || t.includes('compliance')) return 'red';
+    if (t.includes('hr') || t.includes('human resource') || t.includes('recruiter')) return 'green';
     return 'gray';
   };
 
@@ -103,111 +108,148 @@ export const CustomTable: React.FC<CustomTableProps> = ({ users, onEdit, onDelet
           <Heading size="md" color="gray.500">
             No employees found
           </Heading>
-          <Text color="gray.400">Try adjusting your search query or filters.</Text>
+          <Text color="gray.400">Try adjusting your search or filters.</Text>
         </VStack>
       </Center>
     );
   }
 
   return (
-    <TableContainer
-      bg={bg}
-      border="1px"
-      borderColor={borderColor}
-      borderRadius="2xl"
-      boxShadow="sm"
-      position="relative"
-      overflowX="auto"
-    >
+    <TableContainer bg={bg} border="1px" borderColor={borderColor} borderRadius="2xl" boxShadow="sm" overflowX="auto">
       <Table variant="simple" size="md">
         <Thead bg={headerBg}>
           <Tr>
-            <Th cursor="pointer" onClick={() => handleSort('username')} userSelect="none" py={4}>
-              <Flex align="center">Username {getSortIcon('username')}</Flex>
-            </Th>
-            <Th cursor="pointer" onClick={() => handleSort('company')} userSelect="none" py={4}>
-              <Flex align="center">Company {getSortIcon('company')}</Flex>
-            </Th>
-            <Th cursor="pointer" onClick={() => handleSort('role')} userSelect="none" py={4}>
-              <Flex align="center">Role {getSortIcon('role')}</Flex>
-            </Th>
-            <Th cursor="pointer" onClick={() => handleSort('email')} userSelect="none" py={4}>
-              <Flex align="center">Email {getSortIcon('email')}</Flex>
-            </Th>
-            <Th cursor="pointer" onClick={() => handleSort('salary')} userSelect="none" py={4} isNumeric>
-              <Flex align="center" justify="flex-end">
-                Salary {getSortIcon('salary')}
+            <Th
+              cursor="pointer"
+              onClick={() => handleSort('name')}
+              userSelect="none"
+              py={4}
+              fontSize="xs"
+              letterSpacing="wider"
+            >
+              <Flex align="center">
+                Employee <SortIcon field="name" />
               </Flex>
             </Th>
-            <Th py={4} textAlign="center" width="120px">
+
+            <Th
+              cursor="pointer"
+              onClick={() => handleSort('company')}
+              userSelect="none"
+              py={4}
+              fontSize="xs"
+              letterSpacing="wider"
+            >
+              <Flex align="center">
+                Company <SortIcon field="company" />
+              </Flex>
+            </Th>
+
+            <Th
+              cursor="pointer"
+              onClick={() => handleSort('role')}
+              userSelect="none"
+              py={4}
+              fontSize="xs"
+              letterSpacing="wider"
+            >
+              <Flex align="center">
+                Role <SortIcon field="role" />
+              </Flex>
+            </Th>
+
+            <Th
+              cursor="pointer"
+              onClick={() => handleSort('country')}
+              userSelect="none"
+              py={4}
+              fontSize="xs"
+              letterSpacing="wider"
+            >
+              <Flex align="center">
+                Country <SortIcon field="country" />
+              </Flex>
+            </Th>
+
+            <Th py={4} textAlign="center" fontSize="xs" letterSpacing="wider" width="110px">
               Actions
             </Th>
           </Tr>
         </Thead>
         <Tbody>
           {sortedUsers.map((user) => (
-            <Tr key={user.id} _hover={{ bg: hoverBg }} transition="background 0.15s">
-              {/* Username */}
-              <Td py={4} fontWeight="medium">
-                <Text color={textColor}>{user.username}</Text>
+            <Tr key={user.id} _hover={{ bg: hoverBg }} transition="background 0.15s" cursor="default">
+              <Td py={4}>
+                <HStack spacing={3}>
+                  <Avatar name={`${user.firstName} ${user.lastName}`} src={user.image} size="sm" borderRadius="xl" />
+                  <Box>
+                    <Text fontWeight="semibold" color={textColor} fontSize="sm">
+                      {user.firstName} {user.lastName}
+                    </Text>
+                    <Text fontSize="xs" color={subTextColor} noOfLines={1}>
+                      {user.email}
+                    </Text>
+                  </Box>
+                </HStack>
               </Td>
 
-              {/* Company */}
               <Td py={4}>
-                <Badge
+                <Box>
+                  <Text fontWeight="semibold" color={textColor} fontSize="sm">
+                    {user.company?.name || 'Freelance'}
+                  </Text>
+                  {user.company?.department && (
+                    <Text fontSize="xs" color={subTextColor}>
+                      {user.company.department}
+                    </Text>
+                  )}
+                </Box>
+              </Td>
+
+              <Td py={4}>
+                <Tag
+                  size="md"
+                  variant="subtle"
+                  colorScheme={getRoleBadge(user.company?.title || '')}
+                  borderRadius="full"
                   px={3}
                   py={1}
-                  borderRadius="full"
-                  variant="subtle"
-                  colorScheme="gray"
-                  textTransform="none"
-                  fontWeight="semibold"
                 >
-                  {user.company}
-                </Badge>
-              </Td>
-
-              {/* Role */}
-              <Td py={4}>
-                <Tag size="md" variant="subtle" colorScheme={getRoleColorScheme(user.role)} borderRadius="full">
-                  <TagLabel fontWeight="medium">{user.role}</TagLabel>
+                  <TagLabel fontWeight="medium" fontSize="xs">
+                    {user.company?.title || user.role}
+                  </TagLabel>
                 </Tag>
               </Td>
 
-              {/* Email */}
               <Td py={4}>
-                <Text color="gray.500" _dark={{ color: 'gray.400' }} fontSize="sm">
-                  {user.email}
-                </Text>
+                <HStack spacing={2}>
+                  <Text fontSize="sm" color={textColor} fontWeight="medium">
+                    {user.address?.country || 'United States'}
+                  </Text>
+                </HStack>
               </Td>
 
-              {/* Salary */}
-              <Td py={4} isNumeric fontWeight="semibold">
-                <Text color="green.600" _dark={{ color: 'green.300' }}>
-                  {formatCurrency(user.salary)}
-                </Text>
-              </Td>
-
-              {/* Actions */}
               <Td py={4}>
                 <HStack spacing={2} justify="center">
                   <IconButton
                     aria-label="Edit employee"
-                    icon={<FiEdit2 size={16} />}
+                    icon={<FiEdit2 size={15} />}
                     size="sm"
                     variant="ghost"
                     colorScheme="blue"
                     onClick={() => onEdit(user)}
                     borderRadius="lg"
+                    _hover={{ bg: 'blue.50', _dark: { bg: 'blue.900' } }}
                   />
                   <IconButton
                     aria-label="Delete employee"
-                    icon={<FiTrash2 size={16} />}
+                    icon={<FiTrash2 size={15} />}
                     size="sm"
                     variant="ghost"
                     colorScheme="red"
                     onClick={() => onDelete(user)}
                     borderRadius="lg"
+                    _hover={{ bg: 'red.50', _dark: { bg: 'red.900' } }}
                   />
                 </HStack>
               </Td>
@@ -218,3 +260,5 @@ export const CustomTable: React.FC<CustomTableProps> = ({ users, onEdit, onDelet
     </TableContainer>
   );
 };
+
+export default CustomTable;

@@ -22,7 +22,6 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ stats }) => {
   const cardBorder = useColorModeValue('gray.100', 'gray.700');
   const labelColor = useColorModeValue('gray.500', 'gray.400');
 
-  // Format currency
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -33,7 +32,6 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ stats }) => {
 
   return (
     <SimpleGrid columns={{ base: 1, md: 3 }} spacing={{ base: 5, lg: 8 }} mb={8}>
-      {/* Total Employees */}
       <Box
         px={{ base: 4, md: 6 }}
         py="5"
@@ -72,7 +70,6 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ stats }) => {
         </Flex>
       </Box>
 
-      {/* Average Salary */}
       <Box
         px={{ base: 4, md: 6 }}
         py="5"
@@ -111,7 +108,6 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ stats }) => {
         </Flex>
       </Box>
 
-      {/* Top Company */}
       <Box
         px={{ base: 4, md: 6 }}
         py="5"
